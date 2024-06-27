@@ -1,0 +1,23 @@
+steps:
+  # Étape pour installer les dépendances
+  - name: 'gcr.io/cloud-builders/pip'
+    args: ['install', '-r', 'requirements.txt']
+    dir: 'main.py'
+
+  # Étape pour déployer la Cloud Function
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud functions deploy process_file \
+          --runtime python39 \
+          --trigger-resource <YOUR_BUCKET_NAME> \
+          --trigger-event google.storage.object.finalize \
+          --entry-point process_file \
+          --set-env-vars DATASET_NAME=<YOUR_DATASET_NAME>
+
+# Substitutions pour personnaliser les variables si nécessaire
+substitutions:
+  _BUCKET_NAME: 'gcp_project_f1_bucket'
+  _DATASET_NAME: 'raw_dataset_f1'
